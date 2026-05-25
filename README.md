@@ -9,27 +9,27 @@ Sistema de Punto de Venta (POS) base para pymes chilenas. Esta aplicación es el
 
 ## Stack tecnológico base
 
-| Capa       | Tecnología                     |
-|------------|-------------------------------|
-| Frontend   | Next.js 14 (React, App Router) |
-| Backend    | Node.js 18 + Express           |
-| Base de Datos | PostgreSQL 14+              |
-| Autenticación | JWT (estructura lista, pendiente de implementar) |
+| Capa          | Tecnología                      |
+|---------------|--------------------------------|
+| Frontend      | Next.js 14 (React, App Router)  |
+| Backend       | Node.js 18 + Express            |
+| Base de Datos | PostgreSQL 14+                  |
+| Autenticación | JWT con roles (admin / cajero)  |
 
 ---
 
 ## Módulos del sistema
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Dashboard** | KPIs: ventas del día, del mes, productos y clientes |
-| **POS** | Carrito de compra, selección de cliente y método de pago |
-| **Productos** | CRUD con subida de imágenes y control de stock |
-| **Categorías** | Gestión de categorías de productos |
-| **Clientes** | CRUD con RUT chileno |
-| **Ventas** | Historial con opción de anulación |
-| **Reportes** | Gráficos de ventas por día, top productos y métodos de pago |
-| **Usuarios** | Gestión de usuarios y roles (admin / cajero) |
+| Módulo | Descripción | Acceso |
+|--------|-------------|--------|
+| **Dashboard** | KPIs: ventas del día, del mes, productos y clientes | Admin |
+| **POS** | Carrito de compra, selección de cliente y método de pago | Admin / Cajero |
+| **Productos** | CRUD con subida de imágenes y control de stock | Admin / Cajero |
+| **Categorías** | Gestión de categorías de productos | Admin / Cajero |
+| **Clientes** | CRUD con RUT chileno | Admin / Cajero |
+| **Ventas** | Historial; anulación solo disponible para Admin | Admin / Cajero |
+| **Reportes** | Gráficos de ventas por día, top productos y métodos de pago | Admin |
+| **Usuarios** | Gestión de usuarios y roles | Admin |
 
 ---
 
@@ -50,7 +50,7 @@ pos-system/
 │   │   │   ├── reportController.js
 │   │   │   └── userController.js
 │   │   ├── middleware/
-│   │   │   ├── auth.js              # ⚠️ Skeleton JWT — pendiente de implementar
+│   │   │   ├── auth.js              # JWT activo + control de roles
 │   │   │   └── upload.js            # Multer — almacenamiento local
 │   │   ├── routes/                  # Definición de rutas REST
 │   │   ├── app.js                   # Express app
@@ -72,10 +72,11 @@ pos-system/
 │   │   │       ├── reports/
 │   │   │       └── users/
 │   │   ├── components/
-│   │   │   └── Sidebar.jsx
+│   │   │   └── Sidebar.jsx          # Navegación filtrada por rol
 │   │   └── lib/
-│   │       ├── api.js               # Axios configurado
+│   │       ├── api.js               # Axios con interceptor JWT
 │   │       └── utils.js             # Helpers (formatCLP, formatDate)
+│   ├── jsconfig.json
 │   ├── .env.local.example
 │   └── package.json
 ├── database/
@@ -93,6 +94,8 @@ pos-system/
 - Node.js 18+
 - PostgreSQL 14+
 - npm
+
+> Cada equipo elige cómo desplegar la aplicación: máquinas virtuales, contenedores, PaaS, etc. Las instrucciones siguientes corresponden a la ejecución directa con Node.js.
 
 ### 1 — Base de datos
 
@@ -147,8 +150,8 @@ El frontend queda disponible en `http://localhost:3000`
 
 ### Credenciales por defecto
 
-| Usuario | Email | Contraseña |
-|---------|-------|------------|
+| Rol | Email | Contraseña |
+|-----|-------|------------|
 | Administrador | `admin@pos.cl` | `admin123` |
 | Cajero | `cajero@pos.cl` | `cajero123` |
 
@@ -190,7 +193,6 @@ El frontend queda disponible en `http://localhost:3000`
 Este sistema fue desarrollado **intencionalmente** con las siguientes limitaciones que representan los desafíos típicos de un monolito sin preparación cloud. Identificarlas, justificarlas y resolverlas en la arquitectura cloud es parte central de la evaluación.
 
 ### Seguridad
-- [ ] **Autenticación no implementada** — El middleware JWT está como skeleton; todas las rutas son accesibles sin token. Ver `backend/src/middleware/auth.js`
 - [ ] **Credenciales con fallback hardcodeado** — Si no existe `.env`, el código usa `postgres/postgres`. Ver `backend/src/config/database.js`
 - [ ] **CORS permisivo** — `app.use(cors())` acepta cualquier origen. Ver `backend/src/app.js`
 - [ ] **Sin validación de inputs** — Los controllers no validan tipos ni rangos (express-validator está instalado pero sin usar)

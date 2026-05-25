@@ -22,10 +22,3 @@ out/
 # OS
 .DS_Store
 Thumbs.db
-
-# Infraestructura local (cada equipo define la suya)
-docker-compose.yml
-docker-compose.*.yml
-Dockerfile
-.dockerignore
-.gitattributes
