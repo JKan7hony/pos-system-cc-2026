@@ -6,6 +6,12 @@ import { formatCLP } from '@/lib/utils';
 export default function SalesPage() {
   const [sales, setSales]   = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) setIsAdmin(JSON.parse(stored).rol === 'admin');
+  }, []);
 
   const load = () => {
     setLoading(true);
@@ -65,7 +71,7 @@ export default function SalesPage() {
                   </span>
                 </td>
                 <td className="table-cell">
-                  {v.estado === 'completada' && (
+                  {v.estado === 'completada' && isAdmin && (
                     <button onClick={() => handleCancel(v.id)} className="text-red-500 hover:underline text-sm">Anular</button>
                   )}
                 </td>

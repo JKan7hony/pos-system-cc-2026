@@ -10,21 +10,20 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// TODO: Implementar interceptor para adjuntar el token JWT a cada petición
-// cuando la autenticación esté implementada en el backend.
 api.interceptors.request.use((config) => {
-  // TODO: Descomentar cuando el backend valide tokens:
-  // const token = localStorage.getItem('token');
-  // if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Manejo global de errores
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // TODO: Redirigir a /login si el error es 401 y limpiar sesión
-    // if (error.response?.status === 401) { ... }
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
