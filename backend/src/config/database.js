@@ -1,34 +1,42 @@
 const { Pool } = require('pg');
 
-// ⚠️  TODO: PROBLEMA DE SEGURIDAD - Credenciales hardcodeadas
-// En producción, TODAS las credenciales deben provenir de variables de entorno
-// o de un servicio de gestión de secretos (AWS Secrets Manager, etc.)
-// Ver .env.example para la configuración correcta.
-//
-// Pasos para corregir:
-// 1. Crear archivo .env con las credenciales reales (ver .env.example)
-// 2. Descomentar las líneas de process.env y eliminar los valores fijos
+// Validar que existan todas las variables necesarias
+if (
+  !process.env.DB_HOST ||
+  !process.env.DB_PORT ||
+  !process.env.DB_NAME ||
+  !process.env.DB_USER ||
+  !process.env.DB_PASSWORD
+) {
+  throw new Error(
+    'Faltan variables de entorno para la conexión a PostgreSQL'
+  );
+}
 
 const pool = new Pool({
-  host:     process.env.DB_HOST     || 'localhost',   // TODO: Solo variable de entorno
-  port:     process.env.DB_PORT     || 5432,          // TODO: Solo variable de entorno
-  database: process.env.DB_NAME     || 'pos_db',      // TODO: Solo variable de entorno
-  user:     process.env.DB_USER     || 'postgres',    // TODO: Solo variable de entorno
-  password: process.env.DB_PASSWORD || 'postgres',    // TODO: Solo variable de entorno
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
 
-  // TODO: Habilitar SSL para conexiones en producción (RDS, Cloud SQL, etc.)
-  // ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  // SSL para entornos cloud (Azure PostgreSQL, AWS RDS, etc.)
+  ssl:
+    process.env.DB_SSL === 'true'
+      ? { rejectUnauthorized: false }
+      : false,
 
-  // TODO: Configurar pool según la carga esperada
-  max:              10,
+  max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
 
-// TODO: Implementar lógica de reconexión automática (retry) para alta disponibilidad
+// Manejo de errores del pool
 pool.on('error', (err) => {
-  console.error('Error inesperado en el pool de conexiones:', err.message);
-  // TODO: Enviar alerta a sistema de monitoreo (CloudWatch, Datadog, etc.)
+  console.error(
+    'Error inesperado en el pool de conexiones:',
+    err.message
+  );
 });
 
 module.exports = pool;
