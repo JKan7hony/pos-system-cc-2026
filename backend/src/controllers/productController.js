@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { validationResult } = require('express-validator');
 const { uploadImage } = require('../services/blobService');
 
 // TODO: Agregar validación de inputs con express-validator (ya instalado)
@@ -50,9 +51,17 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
   try {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array()
+      });
+    }
+
     const { nombre, descripcion, precio, stock, categoria_id } = req.body;
-    // TODO: Validar que precio >= 0, stock >= 0, nombre no vacío, categoria_id exista
-    //const imagen_url = req.file ? `/uploads/${req.file.filename}` : null;
+
     let imagen_url = null;
 
     if (req.file) {
@@ -64,21 +73,90 @@ const create = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO productos (nombre, descripcion, precio, stock, categoria_id, imagen_url)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [nombre, descripcion || null, Number(precio), Number(stock) || 0, categoria_id || null, imagen_url]
+      `INSERT INTO productos (
+        nombre,
+        descripcion,
+        precio,
+        stock,
+        categoria_id,
+        imagen_url
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`,
+      [
+        nombre,
+        descripcion || null,
+        Number(precio),
+        Number(stock) || 0,
+        categoria_id || null,
+        imagen_url
+      ]
     );
+
     res.status(201).json(result.rows[0]);
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message
+    });
   }
 };
 
+//const update = async (req, res) => {
+//  try {
+//    const { id } = req.params;
+//    const { nombre, descripcion, precio, stock, categoria_id, activo } = req.body;
+    //const imagen_url = req.file ? `/uploads/${req.file.filename}` : undefined;
+//    let imagen_url = undefined;
+
+//    if (req.file) {
+//      imagen_url = await uploadImage(
+//        req.file.buffer,
+//        req.file.originalname,
+//        req.file.mimetype
+//      );
+//    }
+//    const fields = [];
+//    const values = [];
+
+//    if (nombre      !== undefined) { fields.push(`nombre = $${fields.length + 1}`);       values.push(nombre); }
+//    if (descripcion !== undefined) { fields.push(`descripcion = $${fields.length + 1}`);  values.push(descripcion); }
+//    if (precio      !== undefined) { fields.push(`precio = $${fields.length + 1}`);       values.push(Number(precio)); }
+//    if (stock       !== undefined) { fields.push(`stock = $${fields.length + 1}`);        values.push(Number(stock)); }
+//    if (categoria_id !== undefined){ fields.push(`categoria_id = $${fields.length + 1}`); values.push(categoria_id); }
+//    if (activo      !== undefined) { fields.push(`activo = $${fields.length + 1}`);       values.push(activo); }
+//    if (imagen_url  !== undefined) { fields.push(`imagen_url = $${fields.length + 1}`);   values.push(imagen_url); }
+
+//    if (!fields.length) return res.status(400).json({ error: 'No hay campos para actualizar.' });
+
+//    fields.push(`updated_at = NOW()`);
+//    values.push(id);
+
+//    const result = await pool.query(
+//      `UPDATE productos SET ${fields.join(', ')} WHERE id = $${values.length} RETURNING *`,
+//      values
+//    );
+//    if (!result.rows.length) return res.status(404).json({ error: 'Producto no encontrado.' });
+//    res.json(result.rows[0]);
+//  } catch (err) {
+//    res.status(500).json({ error: err.message });
+//  }
+//};
+
 const update = async (req, res) => {
   try {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array()
+      });
+    }
+
     const { id } = req.params;
     const { nombre, descripcion, precio, stock, categoria_id, activo } = req.body;
-    //const imagen_url = req.file ? `/uploads/${req.file.filename}` : undefined;
+
     let imagen_url = undefined;
 
     if (req.file) {
@@ -87,31 +165,76 @@ const update = async (req, res) => {
         req.file.originalname,
         req.file.mimetype
       );
-     }
+    }
+
     const fields = [];
     const values = [];
 
-    if (nombre      !== undefined) { fields.push(`nombre = $${fields.length + 1}`);       values.push(nombre); }
-    if (descripcion !== undefined) { fields.push(`descripcion = $${fields.length + 1}`);  values.push(descripcion); }
-    if (precio      !== undefined) { fields.push(`precio = $${fields.length + 1}`);       values.push(Number(precio)); }
-    if (stock       !== undefined) { fields.push(`stock = $${fields.length + 1}`);        values.push(Number(stock)); }
-    if (categoria_id !== undefined){ fields.push(`categoria_id = $${fields.length + 1}`); values.push(categoria_id); }
-    if (activo      !== undefined) { fields.push(`activo = $${fields.length + 1}`);       values.push(activo); }
-    if (imagen_url  !== undefined) { fields.push(`imagen_url = $${fields.length + 1}`);   values.push(imagen_url); }
+    if (nombre !== undefined) {
+      fields.push(`nombre = $${fields.length + 1}`);
+      values.push(nombre);
+    }
 
-    if (!fields.length) return res.status(400).json({ error: 'No hay campos para actualizar.' });
+    if (descripcion !== undefined) {
+      fields.push(`descripcion = $${fields.length + 1}`);
+      values.push(descripcion);
+    }
+
+    if (precio !== undefined) {
+      fields.push(`precio = $${fields.length + 1}`);
+      values.push(Number(precio));
+    }
+
+    if (stock !== undefined) {
+      fields.push(`stock = $${fields.length + 1}`);
+      values.push(Number(stock));
+    }
+
+    if (categoria_id !== undefined) {
+      fields.push(`categoria_id = $${fields.length + 1}`);
+      values.push(categoria_id);
+    }
+
+    if (activo !== undefined) {
+      fields.push(`activo = $${fields.length + 1}`);
+      values.push(activo);
+    }
+
+    if (imagen_url !== undefined) {
+      fields.push(`imagen_url = $${fields.length + 1}`);
+      values.push(imagen_url);
+    }
+
+    if (!fields.length) {
+      return res.status(400).json({
+        error: 'No hay campos para actualizar.'
+      });
+    }
 
     fields.push(`updated_at = NOW()`);
+
     values.push(id);
 
     const result = await pool.query(
-      `UPDATE productos SET ${fields.join(', ')} WHERE id = $${values.length} RETURNING *`,
+      `UPDATE productos
+      SET ${fields.join(', ')}
+      WHERE id = $${values.length}
+       RETURNING *`,
       values
     );
-    if (!result.rows.length) return res.status(404).json({ error: 'Producto no encontrado.' });
+
+    if (!result.rows.length) {
+      return res.status(404).json({
+        error: 'Producto no encontrado.'
+      });
+    }
+
     res.json(result.rows[0]);
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message
+    });
   }
 };
 
