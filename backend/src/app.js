@@ -17,6 +17,7 @@ const evalRoutes = require('./routes/eval');
 
 const app = express();
 
+app.set('trust proxy', 1);
 // ─── RATE LIMITING ───────────────────────────────────────────────────────────
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

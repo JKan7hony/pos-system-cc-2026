@@ -8,5 +8,10 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor POS corriendo en http://localhost:${PORT}`);
   console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+
   console.log('🚀 Registro de inicio enviado a Azure Application Insights.');
+
+  console.log('🔥 PRUEBA LOG APPLICATION INSIGHTS');
+  console.warn('⚠️ PRUEBA WARNING APPLICATION INSIGHTS');
+  console.error('❌ PRUEBA ERROR APPLICATION INSIGHTS');
 });
