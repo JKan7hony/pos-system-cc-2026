@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
+const { validationResult } = require('express-validator');
 
 /**
  * POST /api/auth/login
@@ -9,18 +10,19 @@ const pool = require('../config/database');
  */
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // TODO: Validar que email y password no estén vacíos
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña son requeridos.' });
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const { email, password } = req.body;
 
     const result = await pool.query(
       `SELECT u.*, r.nombre as rol
-       FROM usuarios u
-       JOIN roles r ON u.rol_id = r.id
-       WHERE u.email = $1 AND u.activo = true`,
+      FROM usuarios u
+      JOIN roles r ON u.rol_id = r.id
+      WHERE u.email = $1 AND u.activo = true`,
       [email]
     );
 
@@ -38,7 +40,7 @@ const login = async (req, res) => {
     // TODO: Usar process.env.JWT_SECRET y process.env.JWT_EXPIRES_IN configurados
     const token = jwt.sign(
       { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol },
-      process.env.JWT_SECRET || 'MiClaveSuperSecretaDelProyectoCloud2026_98234#$!',
+      process.env.JWT_SECRET || // 'MiClaveSuperSecretaDelProyectoCloud2026_98234#$!',
       { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
     );
 
