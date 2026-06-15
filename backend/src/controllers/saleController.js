@@ -1,4 +1,6 @@
 const pool = require('../config/database');
+const { validationResult } = require('express-validator');
+const { uploadImage } = require('../services/blobService');
 
 const getAll = async (req, res) => {
   try {
@@ -57,6 +59,14 @@ const getById = async (req, res) => {
  * Body: { cliente_id, metodo_pago, notas, items: [{ producto_id, cantidad, precio_unitario }] }
  */
 const create = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array()
+    });
+  }
+
   const client = await pool.connect();
   try {
     const { cliente_id, metodo_pago = 'efectivo', notas, items } = req.body;
@@ -79,7 +89,7 @@ const create = async (req, res) => {
         return res.status(404).json({ error: `Producto ID ${item.producto_id} no encontrado.` });
       }
       if (prod.rows[0].stock < item.cantidad) {
-        await client.query('ROLLBACK');
+        await client.query('ROLLBACK');   
         return res.status(400).json({ error: `Stock insuficiente para producto ID ${item.producto_id}.` });
       }
       total += item.precio_unitario * item.cantidad;
