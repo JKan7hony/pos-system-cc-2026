@@ -15,8 +15,10 @@ const createClientValidation = [
     body('nombre')
         .trim()
         .notEmpty()
-        .withMessage('El nombre es obligatorio'),
-
+        .withMessage('El nombre es obligatorio')
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
+        .withMessage('El nombre solo puede contener letras'),
+        
     body('email')
         .optional({ checkFalsy: true })
         .isEmail()
@@ -30,10 +32,11 @@ const createClientValidation = [
 const updateClientValidation = [
 
     body('nombre')
-        .optional()
         .trim()
-        .isLength({ min: 3, max: 100 })
-        .withMessage('El nombre debe tener entre 3 y 100 caracteres'),
+        .notEmpty()
+        .withMessage('El nombre es obligatorio')
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
+        .withMessage('El nombre solo puede contener letras'),
 
     body('email')
         .optional({ checkFalsy: true })

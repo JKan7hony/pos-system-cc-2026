@@ -164,14 +164,54 @@ const handleSubmit = async (e) => {
                 <textarea className="input" rows={2} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio (CLP) *</label>
-                  <input required type="number" min="0" className="input" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                  <input type="number" min="0" className="input" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Precio (CLP) *
+                </label>
+
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  className="input"
+                  value={form.precio}
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      precio: e.target.value
+                    })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Stock
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  className="input"
+                  value={form.stock}
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      stock: e.target.value
+                    })
+                  }
+                />
+              </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
