@@ -24,20 +24,41 @@ export default function ClientsPage() {
     setModal(c);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      if (modal === 'create') await api.post('/clients', form);
-      else await api.put(`/clients/${modal.id}`, form);
-      setModal(null);
-      load();
-    } catch (err) {
-      alert(err.response?.data?.error || 'Error al guardar.');
-    } finally {
-      setSaving(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSaving(true);
+
+  try {
+
+    if (modal === 'create') {
+      await api.post('/clients', form);
+    } else {
+      await api.put(`/clients/${modal.id}`, form);
     }
-  };
+
+    setModal(null);
+    load();
+
+  } catch (err) {
+
+    const data = err.response?.data;
+
+    if (data?.errors?.length) {
+      alert(data.errors[0].msg);
+      return;
+    }
+
+    if (data?.error) {
+      alert(data.error);
+      return;
+    }
+
+    alert('Error al guardar.');
+
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleDelete = async (id) => {
     if (!confirm('¿Desactivar este cliente?')) return;
