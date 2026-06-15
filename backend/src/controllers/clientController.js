@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { validationResult } = require('express-validator');
 
 const getAll = async (req, res) => {
   try {
@@ -30,10 +31,16 @@ const getById = async (req, res) => {
 };
 
 const create = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array()
+    });
+  }
   try {
     const { rut, nombre, email, telefono, direccion } = req.body;
     // TODO: Validar formato de RUT chileno (dígito verificador)
-    if (!rut || !nombre) return res.status(400).json({ error: 'RUT y nombre son requeridos.' });
 
     const result = await pool.query(
       `INSERT INTO clientes (rut, nombre, email, telefono, direccion)
@@ -48,6 +55,13 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array()
+    });
+  }
   try {
     const { nombre, email, telefono, direccion } = req.body;
     const result = await pool.query(
