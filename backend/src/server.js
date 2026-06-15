@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor POS corriendo en http://localhost:${PORT}`);
   console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log('🚀 Telemetría nativa de Azure Monitor lista y transmitiendo.');
 
-  if (appInsights.defaultClient) {
+  if (appInsights && appInsights.defaultClient) {
     appInsights.defaultClient.trackTrace({
       message: 'POS backend iniciado correctamente',
       severity: 1

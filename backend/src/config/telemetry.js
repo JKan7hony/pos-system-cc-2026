@@ -1,37 +1,34 @@
 // src/config/telemetry.js
-const appInsights = require('applicationinsights');
 require('dotenv').config();
 
 const connectionString = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
+let appInsights = null;
 
 if (connectionString) {
-  appInsights.setup(connectionString)
-    .setAutoDependencyCorrelation(true)
-    .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true, true)
-    .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true)
-    .setAutoCollectConsole(true, true) // Intercepta automáticamente los console.log y los manda a Azure
-    .setUseDiskRetryCaching(true)
-    .setSendLiveMetrics(true)
-    .setInternalLogging(true, true)
-    .start();
-
-  appInsights.defaultClient.config.samplingPercentage = 100;
-  appInsights.defaultClient.config.maxBatchSize = 0;
-
-  appInsights.defaultClient.trackTrace({
-    message: 'Application Insights conectado desde backend POS',
-    severity: 1
-  });
-
-  appInsights.defaultClient.trackEvent({
-    name: 'APP_INSIGHTS_TEST_EVENT'
-  });
-
-  appInsights.defaultClient.flush();
-
-  console.log('✅ Azure Application Insights inicializado correctamente.');
+  // Intentar inicializar con el nuevo SDK de OpenTelemetry (Azure Monitor)
+  try {
+    const { useAzureMonitor } = require("@azure/monitor-opentelemetry");
+    useAzureMonitor();
+    console.log('✅ [Azure Monitor] OpenTelemetry inicializado de forma nativa para Chile Central.');
+  } catch (error) {
+    // Si no está instalado, usar el SDK de applicationinsights
+    try {
+      appInsights = require('applicationinsights');
+      appInsights.setup(connectionString)
+        .setAutoDependencyCorrelation(true)
+        .setAutoCollectRequests(true)
+        .setAutoCollectPerformance(true, true)
+        .setAutoCollectExceptions(true)
+        .setAutoCollectDependencies(true)
+        .setAutoCollectConsole(true, true) // Intercepta automáticamente los console.log y los manda a Azure
+        .setUseDiskRetryCaching(true)
+        .setSendLiveMetrics(true)
+        .start();
+      console.log('✅ Azure Application Insights inicializado correctamente (Fallback).');
+    } catch (err) {
+      console.error('❌ Error al inicializar la telemetría de Azure:', err);
+    }
+  }
 } else {
   console.warn('⚠️ APPLICATIONINSIGHTS_CONNECTION_STRING no encontrada. Corriendo sin telemetría cloud.');
 }
