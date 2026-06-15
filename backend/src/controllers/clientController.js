@@ -31,6 +31,7 @@ const getById = async (req, res) => {
 };
 
 const create = async (req, res) => {
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -38,19 +39,81 @@ const create = async (req, res) => {
       errors: errors.array()
     });
   }
-  try {
-    const { rut, nombre, email, telefono, direccion } = req.body;
-    // TODO: Validar formato de RUT chileno (dígito verificador)
 
-    const result = await pool.query(
-      `INSERT INTO clientes (rut, nombre, email, telefono, direccion)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [rut, nombre, email || null, telefono || null, direccion || null]
+  try {
+
+    const { rut, nombre, email, telefono, direccion } = req.body;
+
+    // Buscar si ya existe el RUT
+    const existingClient = await pool.query(
+      'SELECT * FROM clientes WHERE rut = $1',
+      [rut]
     );
+
+    if (existingClient.rows.length > 0) {
+
+      const client = existingClient.rows[0];
+
+      // Si está activo, devolver error
+      if (client.activo) {
+        return res.status(409).json({
+          error: 'El RUT ya está registrado.'
+        });
+      }
+
+      // Si está inactivo, reactivarlo
+      const reactivated = await pool.query(
+        `UPDATE clientes
+         SET activo = true,
+             nombre = $1,
+             email = $2,
+             telefono = $3,
+             direccion = $4
+         WHERE rut = $5
+         RETURNING *`,
+        [
+          nombre,
+          email || null,
+          telefono || null,
+          direccion || null,
+          rut
+        ]
+      );
+
+      return res.status(200).json({
+        message: 'Cliente reactivado correctamente.',
+        cliente: reactivated.rows[0]
+      });
+    }
+
+    // Si no existe, crear normalmente
+    const result = await pool.query(
+      `INSERT INTO clientes
+       (rut, nombre, email, telefono, direccion)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [
+        rut,
+        nombre,
+        email || null,
+        telefono || null,
+        direccion || null
+      ]
+    );
+
     res.status(201).json(result.rows[0]);
+
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ error: 'El RUT ya está registrado.' });
-    res.status(500).json({ error: err.message });
+
+    if (err.code === '23505') {
+      return res.status(409).json({
+        error: 'El RUT ya está registrado.'
+      });
+    }
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 };
 
