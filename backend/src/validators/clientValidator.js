@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const validateRut = require('../utils/validateRut');
-
+// Validaciones para creación y actualización de clientes
 const createClientValidation = [
 
     body('rut')
