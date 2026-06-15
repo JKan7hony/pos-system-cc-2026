@@ -29,27 +29,61 @@ export default function ProductsPage() {
     setModal(p);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => { if (k !== 'imagen' && v !== '') fd.append(k, v); });
-      if (form.imagen) fd.append('imagen', form.imagen);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSaving(true);
 
-      if (modal === 'create') {
-        await api.post('/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      } else {
-        await api.put(`/products/${modal.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  try {
+
+    const fd = new FormData();
+
+    Object.entries(form).forEach(([k, v]) => {
+      if (k !== 'imagen' && v !== '') {
+        fd.append(k, v);
       }
-      setModal(null);
-      load();
-    } catch (err) {
-      alert(err.response?.data?.error || 'Error al guardar.');
-    } finally {
-      setSaving(false);
+    });
+
+    if (form.imagen) {
+      fd.append('imagen', form.imagen);
     }
-  };
+
+    if (modal === 'create') {
+      await api.post('/products', fd, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+    } else {
+      await api.put(`/products/${modal.id}`, fd, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+    }
+
+    setModal(null);
+    load();
+
+  } catch (err) {
+
+    const data = err.response?.data;
+
+    if (data?.errors?.length) {
+      alert(data.errors[0].msg);
+      return;
+    }
+
+    if (data?.error) {
+      alert(data.error);
+      return;
+    }
+
+    alert('Error al guardar.');
+
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleDelete = async (id) => {
     if (!confirm('¿Desactivar este producto?')) return;
