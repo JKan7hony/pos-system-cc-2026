@@ -193,28 +193,28 @@ El frontend queda disponible en `http://localhost:3000`
 Este sistema fue desarrollado **intencionalmente** con las siguientes limitaciones que representan los desafíos típicos de un monolito sin preparación cloud. Identificarlas, justificarlas y resolverlas en la arquitectura cloud es parte central de la evaluación.
 
 ### Seguridad
-- [ ] **Credenciales con fallback hardcodeado** — Si no existe `.env`, el código usa `postgres/postgres`. Ver `backend/src/config/database.js`
-- [ ] **CORS permisivo** — `app.use(cors())` acepta cualquier origen. Ver `backend/src/app.js`
-- [ ] **Sin validación de inputs** — Los controllers no validan tipos ni rangos (express-validator está instalado pero sin usar)
-- [ ] **Sin rate limiting** — La API no tiene límite de peticiones por IP
+- [✔️] **Credenciales con fallback hardcodeado** — Si no existe `.env`, el código usa `postgres/postgres`. Ver `backend/src/config/database.js`
+- [✔️] **CORS permisivo** — `app.use(cors())` acepta cualquier origen. Ver `backend/src/app.js`
+- [✔️] **Sin validación de inputs** — Los controllers no validan tipos ni rangos (express-validator está instalado pero sin usar)
+- [✔️] **Sin rate limiting** — La API no tiene límite de peticiones por IP
 - [ ] **Token en localStorage** — Vulnerable a XSS; en producción usar cookies HttpOnly
 
 ### Disponibilidad
-- [ ] **Sin health check** — No existe `GET /health`; necesario para ALB, ECS, Kubernetes
-- [ ] **Sin SSL en BD** — La conexión a PostgreSQL no usa TLS (requerido en RDS, Cloud SQL, etc.)
-- [ ] **Sin clustering** — Un solo proceso Node.js; sin PM2, ECS tasks o pods de Kubernetes
+- [✔️] **Sin health check** — No existe `GET /health`; necesario para ALB, ECS, Kubernetes
+- [✔️] **Sin SSL en BD** — La conexión a PostgreSQL no usa TLS (requerido en RDS, Cloud SQL, etc.)
+- [✔️] **Sin clustering** — Un solo proceso Node.js; sin PM2, ECS tasks o pods de Kubernetes
 - [ ] **Sin reintentos de conexión** — Si la BD se reinicia, el proceso muere
 
 ### Almacenamiento
-- [ ] **Imágenes en disco local** — `backend/uploads/` es incompatible con múltiples instancias. Migrar a S3 / GCS / Azure Blob + CDN
+- [✔️] **Imágenes en disco local** — `backend/uploads/` es incompatible con múltiples instancias. Migrar a S3 / GCS / Azure Blob + CDN
 
 ### Observabilidad
 - [ ] **Solo console.log** — Sin logging estructurado (Winston, Pino); no integrable con CloudWatch, Stackdriver, etc.
 - [ ] **Sin métricas** — Sin instrumentación para Prometheus/Grafana o herramientas cloud equivalentes
 
 ### Configuración
-- [ ] **Sin secrets management** — No integra AWS Secrets Manager, Azure Key Vault ni GCP Secret Manager
-- [ ] **Sin variables de entorno para producción** — Faltan variables críticas (ver `.env.example`)
+- [✔️] **Sin secrets management** — No integra AWS Secrets Manager, Azure Key Vault ni GCP Secret Manager
+- [✔️] **Sin variables de entorno para producción** — Faltan variables críticas (ver `.env.example`)
 
 ---
 

@@ -1,5 +1,5 @@
 const { body } = require('express-validator');
-const { validateRut } = require('../utils/validateRut');
+const validateRut = require('../utils/validateRut');
 
 const createClientValidation = [
     body('rut')
@@ -18,7 +18,7 @@ const createClientValidation = [
         .withMessage('El nombre es obligatorio')
         .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
         .withMessage('El nombre solo puede contener letras'),
-        
+
     body('email')
         .optional({ checkFalsy: true })
         .isEmail()
