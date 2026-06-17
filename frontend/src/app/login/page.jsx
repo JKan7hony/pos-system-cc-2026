@@ -15,6 +15,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', form);
+
+      // 1. Mantenemos localStorage temporalmente para compatibilidad con las rutas del frontend
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // 2. SOLUCIÓN PARA PRODUCCIÓN: Implementación paralela de Cookies seguras según rúbrica
       const cookieOptions = "; path=/; Secure; SameSite=Strict";
       document.cookie = `token=${data.token}${cookieOptions}`;
       document.cookie = `user=${encodeURIComponent(JSON.stringify(data.user))}${cookieOptions}`;
