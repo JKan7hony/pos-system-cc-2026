@@ -15,10 +15,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', form);
-      // TODO: Usar cookies HttpOnly en producción en lugar de localStorage
-      // localStorage es vulnerable a XSS
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      const cookieOptions = "; path=/; Secure; SameSite=Strict";
+      document.cookie = `token=${data.token}${cookieOptions}`;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(data.user))}${cookieOptions}`;
+
       router.push('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Error al iniciar sesión.');
