@@ -197,20 +197,20 @@ Este sistema fue desarrollado **intencionalmente** con las siguientes limitacion
 - [✔️] **CORS permisivo** — `app.use(cors())` acepta cualquier origen. Ver `backend/src/app.js`
 - [✔️] **Sin validación de inputs** — Los controllers no validan tipos ni rangos (express-validator está instalado pero sin usar)
 - [✔️] **Sin rate limiting** — La API no tiene límite de peticiones por IP
-- [ ] **Token en localStorage** — Vulnerable a XSS; en producción usar cookies HttpOnly
+- [✔️] **Token en localStorage** — Vulnerable a XSS; en producción usar cookies HttpOnly
 
 ### Disponibilidad
 - [✔️] **Sin health check** — No existe `GET /health`; necesario para ALB, ECS, Kubernetes
 - [✔️] **Sin SSL en BD** — La conexión a PostgreSQL no usa TLS (requerido en RDS, Cloud SQL, etc.)
 - [✔️] **Sin clustering** — Un solo proceso Node.js; sin PM2, ECS tasks o pods de Kubernetes
-- [ ] **Sin reintentos de conexión** — Si la BD se reinicia, el proceso muere
+- [✔️] **Sin reintentos de conexión** — Si la BD se reinicia, el proceso muere
 
 ### Almacenamiento
 - [✔️] **Imágenes en disco local** — `backend/uploads/` es incompatible con múltiples instancias. Migrar a S3 / GCS / Azure Blob + CDN
 
 ### Observabilidad
-- [ ] **Solo console.log** — Sin logging estructurado (Winston, Pino); no integrable con CloudWatch, Stackdriver, etc.
-- [ ] **Sin métricas** — Sin instrumentación para Prometheus/Grafana o herramientas cloud equivalentes
+- [✔️] **Solo console.log** — Sin logging estructurado (Winston, Pino); no integrable con CloudWatch, Stackdriver, etc.
+- [✔️] **Sin métricas** — Sin instrumentación para Prometheus/Grafana o herramientas cloud equivalentes
 
 ### Configuración
 - [✔️] **Sin secrets management** — No integra AWS Secrets Manager, Azure Key Vault ni GCP Secret Manager
