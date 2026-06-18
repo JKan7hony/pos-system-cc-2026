@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-api.interceptors.response.use(
+/*api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
@@ -24,6 +24,27 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    return Promise.reject(error);
+  }
+);
+*/
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+
+    const isLoginRequest =
+      error.config?.url?.includes('/auth/login');
+
+    if (
+      error.response?.status === 401 &&
+      !isLoginRequest &&
+      typeof window !== 'undefined'
+    ) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+
     return Promise.reject(error);
   }
 );
